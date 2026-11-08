@@ -101,7 +101,7 @@ fi && \
 if [ -f docker-compose.yml ] || [ -f docker-compose.yaml ] || [ -f compose.yaml ]; then \
     echo 'Stopping and removing all containers/volumes...'; \
     docker rm -f evolution-db 2>/dev/null || true; \
-    docker compose -p vortexai down --volumes --remove-orphans || true; \
+    docker compose -p vortexai down --remove-orphans || true; \
     echo 'Starting containers...'; \
     docker compose -p vortexai up -d --remove-orphans; \
     echo 'Current container status:'; \
