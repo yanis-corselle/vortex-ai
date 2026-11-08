@@ -1,0 +1,39 @@
+name: Vortexai GitOps Deployment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Stack on Raspberry Pi 5
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Environment Configuration
+        run: |
+          echo "Checking environment configuration..."
+          if [ ! -f .env ]; then
+            if [ -f .env.example ]; then
+              echo ".env file missing. Copying from .env.example..."
+              cp .env.example .env
+            else
+              echo "Warning: No .env or .env.example found. Creating minimal .env..."
+              echo "PI_IP=192.168.1.152" > .env
+            fi
+          fi
+
+      - name: Deploy Docker Compose Stack
+        run: |
+          echo "Deploying container stack..."
+          docker compose pull --ignore-build-has-top-level-local-build || true
+          docker compose up -d --build --remove-orphans
+
+      - name: Verify Container Health
+        run: |
+          echo "Checking container status..."
+          docker compose ps

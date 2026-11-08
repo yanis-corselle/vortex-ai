@@ -1,0 +1,12 @@
+# Vortexai - Developer Guidelines & Rules
+
+## Tech Stack
+- Orchestration: Docker & Docker Compose on Raspberry Pi 5 (ARM64).
+- Automation: n8n (workflows versioned in JSON).
+- Messaging: Evolution API (WhatsApp).
+- AI Routing: FreeLLMAPI (OpenAI-compatible endpoints).
+
+## Security & IaC Rules
+1. NEVER hardcode API keys, passwords, or internal IP addresses. Always use `${VARIABLE_NAME}` syntax pointing to a `.env` file.
+2. Keep all configuration files clean, modular, and production-ready.
+3. Ensure workflows and scripts are fully idempotent and container-friendly.
