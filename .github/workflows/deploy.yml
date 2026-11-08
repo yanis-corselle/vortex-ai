@@ -39,7 +39,7 @@ jobs:
 
       - name: Deploy Docker Stack
         run: |
-          docker compose -p vortexai down --volumes --remove-orphans || true
+          docker compose -p vortexai down --remove-orphans || true
           docker compose -p vortexai up -d --remove-orphans
           docker compose -p vortexai ps
 
