@@ -1,0 +1,42 @@
+name: PR CI Validation
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: PR Validation Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Security Scan (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Compose
+        uses: docker/setup-buildx-action@v3
+
+      - name: IaC Validation (Docker Compose)
+        run: |
+          docker compose config --quiet
+
+      - name: n8n Workflow JSON Lint
+        run: |
+          if [ -d "workflows" ] && [ "$(ls -A workflows/*.json 2>/dev/null)" ]; then
+            echo "Validating n8n workflow JSON files..."
+            for file in workflows/*.json; do
+              jq empty "$file" || { echo "Invalid JSON in $file"; exit 1; }
+            done
+            echo "All n8n workflows are valid JSON."
+          else
+            echo "No n8n workflows found in ./workflows/. Skipping lint."
+          fi
