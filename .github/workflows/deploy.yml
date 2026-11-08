@@ -1,39 +1,41 @@
-name: Vortexai GitOps Deployment
+name: Deploy to Raspberry Pi 5
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   deploy:
-    name: Deploy Stack on Raspberry Pi 5
     runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate Environment Configuration
+      - name: Create .env from Secrets
         run: |
-          echo "Checking environment configuration..."
-          if [ ! -f .env ]; then
-            if [ -f .env.example ]; then
-              echo ".env file missing. Copying from .env.example..."
-              cp .env.example .env
-            else
-              echo "Warning: No .env or .env.example found. Creating minimal .env..."
-              echo "PI_IP=192.168.1.152" > .env
-            fi
-          fi
+          cat <<EOF > .env
+          PI_HOST="192.168.1.152"
+          PI_IP="192.168.1.152"
+          PI_USER="yanis"
+          PI_PORT="22"
+          PI_DIR="~/vortexai"
+          COMPOSE_PROJECT_NAME="vortexai"
+          TIMEZONE="Europe/Paris"
+          EVOLUTION_API_KEY="${{ secrets.EVOLUTION_API_KEY }}"
+          EVOLUTION_PORT="8080"
+          DATABASE_CONNECTION_URI="postgresql://postgres:postgres_password@postgres:5432/evolution_db?schema=evolution_api"
+          N8N_PORT="5678"
+          N8N_ENCRYPTION_KEY="${{ secrets.N8N_ENCRYPTION_KEY }}"
+          FREELLMAPI_PORT="3001"
+          FREELLMAPI_KEY="${{ secrets.FREELLMAPI_KEY }}"
+          FREELLMAPI_ENCRYPTION_KEY="${{ secrets.FREELLMAPI_ENCRYPTION_KEY }}"
+          ANYTHINGLLM_PORT="3000"
+          EOF
 
-      - name: Deploy Docker Compose Stack
+      - name: Deploy Docker Stack
         run: |
-          echo "Deploying container stack..."
-          docker compose pull --ignore-build-has-top-level-local-build || true
-          docker compose up -d --build --remove-orphans
+          docker compose -p vortexai down --volumes --remove-orphans || true
+          docker compose -p vortexai up -d --remove-orphans
+          docker compose -p vortexai ps
 
-      - name: Verify Container Health
-        run: |
-          echo "Checking container status..."
-          docker compose ps
