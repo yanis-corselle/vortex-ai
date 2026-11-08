@@ -24,7 +24,7 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1" >&2; }
 REPO_URL="${1:-}"
 RUNNER_TOKEN="${2:-}"
 RUNNER_DIR="${RUNNER_DIR:-$HOME/actions-runner}"
-RUNNER_VERSION="${RUNNER_VERSION:-2.321.0}"
+RUNNER_VERSION="${RUNNER_VERSION:-2.329.0}"
 
 if [[ -z "${REPO_URL}" ]] || [[ -z "${RUNNER_TOKEN}" ]]; then
     echo "======================================================================"
