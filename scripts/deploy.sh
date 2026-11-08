@@ -34,10 +34,16 @@ log_error() {
 
 # 1. Load local .env if available
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ENV_FILE="${SCRIPT_DIR}/.env"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+ENV_FILE="${PROJECT_ROOT}/.env"
 
-if [[ ! -f "${ENV_FILE}" ]]; then
-    log_warn ".env file not found. Proceeding without local configuration."
+if [[ -f "${ENV_FILE}" ]]; then
+    log_info "Loading configuration from .env file..."
+    set -o allexport
+    source "${ENV_FILE}"
+    set +o allexport
+else
+    log_warn ".env file not found at ${ENV_FILE}. Proceeding with environment variables or defaults."
 fi
 
 # 2. Set default connection options without hardcoding credentials
@@ -80,7 +86,7 @@ rsync -avz \
     --exclude='node_modules/' \
     --exclude='tmp/' \
     -e "ssh -p ${PI_PORT}" \
-    "${SCRIPT_DIR}/" \
+    "${PROJECT_ROOT}/" \
     "${PI_USER}@${PI_HOST}:${PI_DIR}/"
 
 log_success "Code synchronization complete."
